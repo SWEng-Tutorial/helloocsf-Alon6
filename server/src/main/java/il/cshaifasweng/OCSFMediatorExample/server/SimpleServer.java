@@ -6,6 +6,8 @@ import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
 import java.io.IOException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class SimpleServer extends AbstractServer {
@@ -48,29 +50,43 @@ public class SimpleServer extends AbstractServer {
 				client.sendToClient(message);
 			}
 			else if(request.startsWith("send Submitters IDs")){
-				//add code here to send submitters IDs to client
+				message.setMessage("326164464, 326184744");
+				client.sendToClient(message);
 			}
 			else if (request.startsWith("send Submitters")){
-				//add code here to send submitters names to client
+				message.setMessage("Alon, Michail");
+				client.sendToClient(message);
 			}
 			else if (request.equals("what’s the time?")) {
-				//add code here to send the time to client
+				DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+				LocalTime currentTime = LocalTime.now();
+				message.setMessage(currentTime.format(dtf));
+				client.sendToClient(message);
 			}
 			else if (request.startsWith("multiply")){
-				//add code here to multiply 2 numbers received in the message and send result back to client
-				//(use substring method as shown above)
+				String n_str = request.substring(9, request.indexOf("*"));
+				String m_str = request.substring(request.indexOf("*") + 1);
+				Integer n = parseToInt(n_str);
+				Integer m = parseToInt(m_str);
+				n *= m;
+				message.setMessage(n.toString());
+				client.sendToClient(message);
 				//message format: "multiply n*m"
 			}else{
-				//add code here to send received message to all clients.
-				//The string we received in the message is the message we will send back to all clients subscribed.
-				//Example:
-					// message received: "Good morning"
-					// message sent: "Good morning"
-				//see code for changing submitters IDs for help
+				message.setMessage(request);
+				sendToAllClients(message);
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+	}
+
+	public int parseToInt(String str){
+		int res = 0;
+		for (int i = 0; i < str.length(); i++){
+			res = res * 10 + str.charAt(i) - '0';
+		}
+		return res;
 	}
 
 	public void sendToAllClients(Message message) {
